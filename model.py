@@ -1,6 +1,6 @@
 
 from langchain_openai import ChatOpenAI
-from langchain_community.chat_models.ollama import ChatOllama
+from langchain_ollama import ChatOllama
 
 import os
 from dotenv import load_dotenv
@@ -25,5 +25,6 @@ def get_model(model_name: str):
 
     if model_name == "ollama":
         return ChatOllama(
-            temperature=0.1, 
+            model="llama3.1:8b",
+            temperature=0.1
         )

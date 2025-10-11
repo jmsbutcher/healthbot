@@ -1,19 +1,5 @@
 
 
-# # Load in the OpenAI key and Tavily key.
-# # In the project folder, create a file named 'config.env'
-# # ensure your .env file contains keys named OPENAI_API_KEY="your key" and TAVILY_API_KEY="your key"
-# from dotenv import load_dotenv
-# import os 
-
-# load_dotenv('.env')
-# assert os.getenv('OPENAI_API_KEY') is not None
-# assert os.getenv('TAVILY_API_KEY') is not None
-
-
-
-
-
 # Helper functions
 
 import time
@@ -36,13 +22,26 @@ def print_messages_so_far(state):
 
 
 
-
-
 # Model
 
 from model import get_model
 
 model = get_model("openai")
+
+
+
+# Tools
+
+from tools import get_tools
+
+tools = get_tools()
+
+
+
+search_model = model.bind_tools(tools)
+
+
+
 
 
 
