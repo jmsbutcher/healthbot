@@ -1,0 +1,12 @@
+[project]
+name = "healthbot-10-11-25"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dotenv>=0.9.9",
+    "langchain-community>=0.3.31",
+    "langchain-openai>=0.3.35",
+    "pytest>=8.4.2",
+]
