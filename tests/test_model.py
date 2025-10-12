@@ -2,7 +2,7 @@
 from langchain_openai import ChatOpenAI
 from langchain_ollama import ChatOllama
 
-from model import get_model
+from src.model import get_model
 
 
 def test_get_model_openai():

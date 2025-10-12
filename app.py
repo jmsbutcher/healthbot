@@ -1,54 +1,23 @@
 
-
-# Helper functions
-
-import time
-
-
-def display_text_to_user(text):
-    print(text) 
-    time.sleep(1) # wait for it to render before asking for input or it'll never show up.
-    
-def ask_user_for_input(input_description):
-    response = input(input_description)
-    return response
-
-def print_messages_so_far(state):
-    print("\n#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#\n")
-    for m in state["messages"]:
-        m.pretty_print()
-        print()
-        
-
-
-
-# Model
-
-from model import get_model
-
-model = get_model("openai")
-
-
-
-# Tools
-
-from tools import get_tools
-
-tools = get_tools()
-
-
-
-search_model = model.bind_tools(tools)
-
-
-
-
-
-
+from langchain_core.runnables import RunnableConfig
+from src.workflow import build_graph
 
 
 def main():
-    print("test")
+    
+    graph = build_graph()
+
+    config = RunnableConfig(recursion_limit=2000, configurable={"thread_id": "2"})  
+
+    initial_state = {"messages": [],}
+    
+    output = graph.invoke(
+        initial_state,
+        config,
+    )
+    print("\n----------------------------------------\nFinal Output:\n")
+    print(output)
+
 
 
 if __name__ == "__main__":
