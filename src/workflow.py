@@ -3,6 +3,8 @@ import os
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import MessagesState, START, StateGraph, END
+from pydantic import BaseModel
+from typing import Literal
 from .utils import print_messages_so_far
 
 
@@ -50,7 +52,7 @@ class State(MessagesState):
 def ask_topic(state: State):
     """Ask the user for a healh topic they would like to learn about"""
     print_messages_so_far(state)
-    state["topic"] = input("Enter a health topic you would like to learn about:")
+    state["topic"] = input("Enter a health topic you would like to learn about: ")
     if (state["topic"] == ""):
         raise Exception("You forgot to enter a topic!")
     return state
@@ -82,7 +84,8 @@ def search_for_topic(state):
 
 
 summarize_instructions = """
-Summarize these search results documents into patient-friendly language.
+Organize these search results documents into patient-friendly language
+to help them learn about the topic.
 
 {documents}
 """
@@ -118,6 +121,72 @@ def present_summarization(state):
 
 
 
+generate_quiz_question_instructions = """
+Create a quiz question based on the following summary. This question is meant
+to test whether a reader has read the summary carefully.
+
+Summary: {summary}
+"""
+
+def generate_quiz_question(state):
+    prompt = generate_quiz_question_instructions.format(
+        summary=state["summarized_search_results"])
+    
+    quiz_question_response = model.invoke(prompt)
+
+    return {"quiz_question": quiz_question_response.content}
+
+
+
+def present_quiz_question_and_obtain_answer(state):
+    print("\nHere is a quiz question to check your comprehension:\n")
+    print(state["quiz_question"])
+
+    answer = input("\nEnter your answer: ")
+
+    return {"quiz_answer": answer}
+
+
+
+generate_feedback_instructions = """
+Evaluate the patient's answer to the quiz question.
+1. Give a letter grade ("A+", "A", "A-", "B+", "B", ... "D", "F") based on how
+   well the answer shows that the patient understood the material.
+2. Explain why the patient received the letter grade.
+3. Include in the explanation relevant citations from the summary to reinforce
+   learning.
+
+Quiz question: {question}
+
+Quiz answer: {answer}
+
+Summary: {summary}
+"""
+
+def generate_feedback(state):
+
+    # Create a structured evaluation to ensure the model returns a letter grade
+    # AND an explanation
+    class QuizEvaluationState(BaseModel):
+        quiz_grade: Literal["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"]
+        quiz_grade_explanation: str
+
+    evaluator = model.with_structured_output(QuizEvaluationState)
+
+    prompt = generate_feedback_instructions.format(
+        question=state["quiz_question"],
+        answer=state["quiz_answer"],
+        summary=state["summarized_search_results"]
+    )
+
+    feedback = evaluator.invoke(prompt)
+
+    return feedback
+
+
+
+
+
 def build_graph():
 
     workflow = StateGraph(State)
@@ -125,15 +194,21 @@ def build_graph():
     workflow.add_node("ask_topic", ask_topic)
     workflow.add_node("search_for_topic", search_for_topic)
     workflow.add_node("summarize", summarize)
-    workflow.add_node("present_summarization", present_summarization)
+    #workflow.add_node("present_summarization", present_summarization)
+    workflow.add_node("generate_quiz_question", generate_quiz_question)
+    workflow.add_node("present_quiz_question_and_obtain_answer", present_quiz_question_and_obtain_answer)
+    workflow.add_node("generate_feedback", generate_feedback)
 
     workflow.add_edge(START, "ask_topic")
     workflow.add_edge("ask_topic", "search_for_topic")
     workflow.add_edge("search_for_topic", "summarize")
     workflow.add_conditional_edges("summarize", present_summarization, {
         "quit": END, 
-        "continue": END
+        "continue": "generate_quiz_question"
     })
+    workflow.add_edge("generate_quiz_question", "present_quiz_question_and_obtain_answer")
+    workflow.add_edge("present_quiz_question_and_obtain_answer", "generate_feedback")
+    workflow.add_edge("generate_feedback", END)
 
     # Add memory
     memory = MemorySaver()
