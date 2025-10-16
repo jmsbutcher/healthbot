@@ -50,6 +50,9 @@ class State(MessagesState):
 
 
 def ask_topic(state: State):
+    # Clear the state
+    state = State()
+
     """Ask the user for a healh topic they would like to learn about"""
     print_messages_so_far(state)
     state["topic"] = input("Enter a health topic you would like to learn about: ")
@@ -151,8 +154,12 @@ def present_quiz_question_and_obtain_answer(state):
 generate_feedback_instructions = """
 Evaluate the patient's answer to the quiz question.
 1. Give a letter grade ("A+", "A", "A-", "B+", "B", ... "D", "F") based on how
-   well the answer shows that the patient understood the material.
-2. Explain why the patient received the letter grade.
+   well the answer shows that the patient understood the material. Allow for 
+   answers that answer the question accurately, even if phrased differently or
+   uses different words for the same thing. Allow for partial answers, but 
+   give those a lower letter grade.
+2. Explain why the patient received the letter grade, addressed toward the
+   patient.
 3. Include in the explanation relevant citations from the summary to reinforce
    learning.
 
@@ -185,6 +192,35 @@ def generate_feedback(state):
 
 
 
+feedback_template = """
+Here is your grade: {grade}
+
+{explanation}
+"""
+
+def present_feedback(state):
+
+    feedback = feedback_template.format(
+        grade = state["quiz_grade"],
+        explanation = state["quiz_grade_explanation"]
+    )
+
+    print("\n" + feedback + "\n")
+
+
+
+def ask_for_repeat_or_exit(state):
+
+    print("\n")
+
+    repeat = input("Would you like to learn about another health topic? [y/n]: ")
+
+    if repeat.strip().lower() == "y":
+        return "yes"
+    return "no"
+
+
+
 
 
 def build_graph():
@@ -194,10 +230,10 @@ def build_graph():
     workflow.add_node("ask_topic", ask_topic)
     workflow.add_node("search_for_topic", search_for_topic)
     workflow.add_node("summarize", summarize)
-    #workflow.add_node("present_summarization", present_summarization)
     workflow.add_node("generate_quiz_question", generate_quiz_question)
     workflow.add_node("present_quiz_question_and_obtain_answer", present_quiz_question_and_obtain_answer)
     workflow.add_node("generate_feedback", generate_feedback)
+    workflow.add_node("present_feedback", present_feedback)
 
     workflow.add_edge(START, "ask_topic")
     workflow.add_edge("ask_topic", "search_for_topic")
@@ -208,7 +244,11 @@ def build_graph():
     })
     workflow.add_edge("generate_quiz_question", "present_quiz_question_and_obtain_answer")
     workflow.add_edge("present_quiz_question_and_obtain_answer", "generate_feedback")
-    workflow.add_edge("generate_feedback", END)
+    workflow.add_edge("generate_feedback", "present_feedback")
+    workflow.add_conditional_edges("present_feedback", ask_for_repeat_or_exit, {
+        "yes": "ask_topic",
+        "no": END
+    })
 
     # Add memory
     memory = MemorySaver()
@@ -221,11 +261,6 @@ def build_graph():
     output_path = "graph_diagram.png"
     with open(output_path, "wb") as f:
         f.write(png_data)
-    # try:
-    #     os.startfile(output_path)
-    # except OSError:
-    #     print("No default application set for viewing .png files on Windows or not running on Windows")
-
 
     return graph
 
