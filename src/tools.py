@@ -34,11 +34,6 @@ def search_tool(query: str):
 
 
 
-
-
-
-
-
 tools_list = [
     search_tool
     # ... add additional tools here ...

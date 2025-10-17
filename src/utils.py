@@ -12,7 +12,7 @@ def ask_user_for_input(input_description):
     return response
 
 def print_messages_so_far(state):
-    print("\n#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#\n")
+    print("\n------------------------------------------------------------------\n")
     messages = state.get("messages", [])
     for m in messages:
         m.pretty_print()

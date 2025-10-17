@@ -1,6 +1,6 @@
 
 import os
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
+from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import MessagesState, START, StateGraph, END
 from pydantic import BaseModel
@@ -13,7 +13,7 @@ from .utils import print_messages_so_far
 
 from src.model import get_model
 
-model = get_model("openai")
+model = get_model("ollama")
 
 
 
@@ -50,10 +50,9 @@ class State(MessagesState):
 
 
 def ask_topic(state: State):
-    # Clear the state
+    # Clear the state (necessary for when the user wants to repeat the workflow)
     state = State()
 
-    """Ask the user for a healh topic they would like to learn about"""
     print_messages_so_far(state)
     state["topic"] = input("Enter a health topic you would like to learn about: ")
     if (state["topic"] == ""):
@@ -88,7 +87,8 @@ def search_for_topic(state):
 
 summarize_instructions = """
 Organize these search results documents into patient-friendly language
-to help them learn about the topic.
+to help them learn about the topic. Respond with a summary addressed
+toward the user.
 
 {documents}
 """
@@ -126,7 +126,8 @@ def present_summarization(state):
 
 generate_quiz_question_instructions = """
 Create a quiz question based on the following summary. This question is meant
-to test whether a reader has read the summary carefully.
+to test whether the user has read the summary carefully. Respond with the
+question only.
 
 Summary: {summary}
 """
@@ -152,14 +153,14 @@ def present_quiz_question_and_obtain_answer(state):
 
 
 generate_feedback_instructions = """
-Evaluate the patient's answer to the quiz question.
+Evaluate the user's answer to the quiz question.
 1. Give a letter grade ("A+", "A", "A-", "B+", "B", ... "D", "F") based on how
-   well the answer shows that the patient understood the material. Allow for 
+   well the answer shows that the user understood the material. Allow for 
    answers that answer the question accurately, even if phrased differently or
-   uses different words for the same thing. Allow for partial answers, but 
-   give those a lower letter grade.
-2. Explain why the patient received the letter grade, addressed toward the
-   patient.
+   uses different words for the same thing. Allow for partial and misspelled
+   answers, but give those a slightly lower letter grade.
+2. Explain why the user received the letter grade, addressed toward the
+   user.
 3. Include in the explanation relevant citations from the summary to reinforce
    learning.
 
