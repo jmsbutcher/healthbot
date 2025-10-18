@@ -12,7 +12,11 @@ from .utils import print_messages_so_far
 
 from src.model import get_model
 
+#------------------------------------------
+# Edit this to use the model of your choice
 model = get_model("ollama")
+#                  ^^^^^^
+#------------------------------------------
 
 
 

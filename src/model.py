@@ -15,6 +15,9 @@ def get_model(model_name: str):
     Choices: "openai", "ollama"
     """
 
+    # Requires an Open AI api key.
+    # Create a ".env" file in top level directory and include the line:
+    #  OPENAI_API_KEY=<your api key>
     if model_name == "openai":
         from pydantic import SecretStr
         return ChatOpenAI(
@@ -23,10 +26,17 @@ def get_model(model_name: str):
             streaming=True
         )
 
+    # Requires Ollama to be installed and running on your machine, and must 
+    # pull the below model (Example: run "ollama pull llama3.1:8b" in terminal)
     if model_name == "ollama":
         return ChatOllama(
             model="llama3.1:8b",
             temperature=0.1
         )
     
+
+    # ... Add additional models here ...
+    
+    
     raise Exception("Invalid model name: " + model_name)
+
