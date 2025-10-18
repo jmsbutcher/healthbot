@@ -146,7 +146,7 @@ def present_summarization(state):
     user_entry = input("\n: ")
     
     if user_entry.strip().lower() == 'q':
-        return "quit"
+        return "exit"
     
     return "continue"
 
@@ -260,8 +260,8 @@ def ask_for_repeat_or_exit(state):
     repeat = input("Would you like to learn about another health topic? [y/n]: ")
 
     if repeat.strip().lower() == "y":
-        return "yes"
-    return "no"
+        return "repeat"
+    return "exit"
 
 
 
@@ -284,15 +284,15 @@ def build_graph():
     workflow.add_edge("ask_topic", "search_for_topic")
     workflow.add_edge("search_for_topic", "summarize")
     workflow.add_conditional_edges("summarize", present_summarization, {
-        "quit": END, 
+        "exit": END, 
         "continue": "generate_quiz_question"
     })
     workflow.add_edge("generate_quiz_question", "present_quiz_question_and_obtain_answer")
     workflow.add_edge("present_quiz_question_and_obtain_answer", "generate_feedback")
     workflow.add_edge("generate_feedback", "present_feedback")
     workflow.add_conditional_edges("present_feedback", ask_for_repeat_or_exit, {
-        "yes": "ask_topic",
-        "no": END
+        "repeat": "ask_topic",
+        "exit": END
     })
 
     # Add memory
