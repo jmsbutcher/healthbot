@@ -1,6 +1,7 @@
 
 from langchain_openai import ChatOpenAI
 from langchain_ollama import ChatOllama
+from langchain_core.language_models.chat_models import BaseChatModel
 
 import os
 from dotenv import load_dotenv
@@ -10,7 +11,7 @@ assert os.getenv('TAVILY_API_KEY') is not None
 
 
 
-def get_model(model_name: str):
+def get_model(model_name: str) -> BaseChatModel:
     """
     Choices: "openai", "ollama"
     """
@@ -37,6 +38,6 @@ def get_model(model_name: str):
 
     # ... Add additional models here ...
     
-    
+
     raise Exception("Invalid model name: " + model_name)
 
