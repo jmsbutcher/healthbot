@@ -28,3 +28,5 @@ def get_model(model_name: str):
             model="llama3.1:8b",
             temperature=0.1
         )
+    
+    raise Exception("Invalid model name: " + model_name)

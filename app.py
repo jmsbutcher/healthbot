@@ -1,6 +1,7 @@
 
 from langchain_core.runnables import RunnableConfig
 from src.workflow import build_graph
+from src.utils import print_formatted_state
 
 
 def main():
@@ -16,7 +17,8 @@ def main():
         config,
     )
     print("\n----------------------------------------\nFinal Output:\n")
-    print(output)
+
+    print_formatted_state(output)
 
 
 

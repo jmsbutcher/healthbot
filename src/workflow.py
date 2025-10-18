@@ -1,5 +1,4 @@
 
-import os
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import MessagesState, START, StateGraph, END
@@ -46,20 +45,39 @@ class State(MessagesState):
 
 
 
+#------------------------------------------------------------------------------
 # Nodes
 
 
+
+# 1. ask_topic
+
 def ask_topic(state: State):
-    # Clear the state (necessary for when the user wants to repeat the workflow)
-    state = State()
 
-    print_messages_so_far(state)
-    state["topic"] = input("Enter a health topic you would like to learn about: ")
-    if (state["topic"] == ""):
+    # Reset the state by creating a new state dictionary with default/empty values
+    # (This is necessary for when the user wants to repeat the workflow)
+    new_state = {
+        "messages": state["messages"],
+        "topic": "",
+        "search_query": "",
+        "search_results": "",
+        "summarized_search_results": "",
+        "quiz_question": "",
+        "quiz_answer": "",
+        "quiz_grade": "",
+        "quiz_grade_explanation": "",
+        "repeat": False
+    }
+
+    new_state["topic"] = input("Enter a health topic you would like to learn about: ")
+    if (new_state["topic"] == ""):
         raise Exception("You forgot to enter a topic!")
-    return state
+    return new_state
 
 
+
+
+# 2.  search_for_topic
 
 search_instructions = """
 Generate a well-structured query for use in web-search related to the
@@ -85,6 +103,9 @@ def search_for_topic(state):
 
 
 
+
+# 3. summarize
+
 summarize_instructions = """
 Organize these search results documents into patient-friendly language
 to help them learn about the topic. Respond with a summary addressed
@@ -106,6 +127,9 @@ def summarize(state):
 
 
 
+
+# 4. (Router) present_summarization
+
 def present_summarization(state):
     print(f"""
     Here is a summary on the topic of {state["topic"]}.
@@ -123,6 +147,9 @@ def present_summarization(state):
     return "continue"
 
 
+
+
+# 5. generate_quiz_question
 
 generate_quiz_question_instructions = """
 Create a quiz question based on the following summary. This question is meant
@@ -142,6 +169,9 @@ def generate_quiz_question(state):
 
 
 
+
+# 6. present_quiz_question_and_obtain_answer
+
 def present_quiz_question_and_obtain_answer(state):
     print("\nHere is a quiz question to check your comprehension:\n")
     print(state["quiz_question"])
@@ -151,6 +181,9 @@ def present_quiz_question_and_obtain_answer(state):
     return {"quiz_answer": answer}
 
 
+
+
+# 7. generate_feedback
 
 generate_feedback_instructions = """
 Evaluate the user's answer to the quiz question.
@@ -193,6 +226,9 @@ def generate_feedback(state):
 
 
 
+
+# 8. present_feedback
+
 feedback_template = """
 Here is your grade: {grade}
 
@@ -210,6 +246,9 @@ def present_feedback(state):
 
 
 
+
+# 9. (Router) ask_for_repeat_or_exit
+
 def ask_for_repeat_or_exit(state):
 
     print("\n")
@@ -219,6 +258,7 @@ def ask_for_repeat_or_exit(state):
     if repeat.strip().lower() == "y":
         return "yes"
     return "no"
+
 
 
 

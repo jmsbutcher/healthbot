@@ -9,6 +9,9 @@ from langchain_core.messages import ToolMessage
 
 
 #------------------------------------------------------------------------------
+# Define tools
+
+
 # Tavily search tool
 
 from langchain_community.tools.tavily_search import TavilySearchResults
@@ -32,7 +35,12 @@ def search_tool(query: str):
     return formatted_search_docs
 
 
+# ... define additional tools here ...
 
+
+
+#------------------------------------------------------------------------------
+# List all tools
 
 tools_list = [
     search_tool
@@ -41,6 +49,12 @@ tools_list = [
 
 tool_map = {tool.name: tool for tool in tools_list}
 
+
+
+
+
+#------------------------------------------------------------------------------
+# Helper functions
 
 
 def get_tools():
@@ -62,9 +76,5 @@ def execute_tool_calls(response, state, tools_list):
                 tool_call_id=tool_call["id"]
             )
             state["messages"].append(tool_message)
-
-
-
-
 
 

@@ -1,6 +1,6 @@
-
-
+import json
 import time
+from typing import Dict, Any
 
 
 def display_text_to_user(text):
@@ -18,3 +18,14 @@ def print_messages_so_far(state):
         m.pretty_print()
         print()
 
+def print_formatted_state(state: Dict[str, Any]) -> None:
+    # Convert messages to a JSON-serializable format
+    serializable_state = state.copy()  # Create a copy to avoid modifying the original state
+    if "messages" in serializable_state:
+        serializable_state["messages"] = [
+            message.dict() for message in serializable_state["messages"]
+        ]  # Convert each AnyMessage to a dictionary
+
+    # Convert to indented JSON string
+    json_str = json.dumps(serializable_state, indent=4, sort_keys=True)
+    print(json_str)
