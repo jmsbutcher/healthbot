@@ -1,6 +1,6 @@
 # Healthbot
 
-### A text-based chatbot that helps you learn about healh topics
+### An interactive chatbot that helps you learn about healh topics
 
 Final project from Udacity course "AI Agents with LangChain and LangGraph" https://www.udacity.com/enrollment/cd13764. 10/11/25
 
@@ -9,11 +9,11 @@ Final project from Udacity course "AI Agents with LangChain and LangGraph" https
 
 1. Ask user to enter a health topic they would like to learn about.
 2. Search the web for resources on the topic.
-3. Summarize the findings and present them to the user to study.
-4. Once user is ready to continue, give user a quiz question to test their comprehension of the material.
-5. Obtain the user's answer to the quiz question
-6. Present a letter grade and an explanation to the user to reinforce learning.
-7. Ask user if they would like to learn about another topic
+3. Summarize the findings and present them to the user for study.
+4. Once user is ready to continue, present a quiz question to test their comprehension of the material.
+5. Obtain the user's answer to the quiz question.
+6. Present a letter grade and an explanation to the user to help reinforce learning.
+7. Ask user if they would like to learn about another topic.
 
 
 <p align="center">
@@ -36,7 +36,7 @@ To set up and run the project on a new machine using uv, follow these steps:
 1. **Clone the repository:**
 
 ```
-git clone https://github.com/your-username/healthbot.git
+git clone https://github.com/jmsbutcher/healthbot.git
 cd healthbot
 ```
 

@@ -1,7 +1,7 @@
 [project]
 name = "healthbot-10-11-25"
 version = "0.1.0"
-description = "Add your description here"
+description = "An interactive chatbot that helps you learn about healh topics"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
